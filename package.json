@@ -1,0 +1,21 @@
+{
+  "name": "reminders",
+  "version": "1.0.0",
+  "description": "reminders built on google calendar",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "sjs",
+  "license": "MIT",
+  "dependencies": {
+    "agenda": "^0.6.28",
+    "cookie-parser": "^1.3.4",
+    "datejs": "^1.0.0-rc3",
+    "express": "^4.12.2",
+    "googleapis": "^1.1.5",
+    "mongodb": "^1.4.34",
+    "promise": "^6.1.0",
+    "twilio": "^1.11.1"
+  }
+}
