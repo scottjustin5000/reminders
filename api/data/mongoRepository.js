@@ -97,8 +97,10 @@ function mongoRepository(object) {
                     },
                     function(err, object) {
                         if (!err) {
+                            console.log(object);
                             fulfill(object);
                         } else {
+                            console.log(err);
                             reject(err);
                         }
                     });

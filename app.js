@@ -1,11 +1,8 @@
-//var config = require('./config');
+var config = require('./config');
 var express = require('express');
 var cookieParser = require('cookie-parser');
 
-//var date = require('datejs');
-//var twilio = require('twilio');
 var app = express();
-//var calendar = gapi.calendar('v3');
 
 var bodyParser = require('body-parser');
 
@@ -26,8 +23,8 @@ app.use(allowCrossDomain);
 app.use(express.static(__dirname + '/static'));
 
 require('./api/authorization/routes')(app);
+require('./api/calendar/routes')(app);
 
-//require('./api/apps/expense/routes')(app);
 app.listen(process.env.port || 3000);
 
 console.log('listening...')

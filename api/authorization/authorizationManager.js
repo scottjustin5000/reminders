@@ -1,5 +1,6 @@
 var Promise = require('Promise');
 var config = require('../../config.js');
+var date = require('datejs');
 var gapi = require('googleapis');
 var repository = require('../data/mongoRepository.js');
 
@@ -17,12 +18,21 @@ module.exports = function authorizationManager() {
                 .then(function(userTokens) {
                     //test if expired, or not
                     if (userTokens) {
-                        if (Date.compare(Date.today().setTimeToNow(), Date.parse(userTokens.expires_at)) == -1) {
-                            setCredentials(userTokens.access_token, userTokens.refresh_token);
-                        } else {
-                            refreshToken(id, userTokens.refresh_token).then(function() {
-                                fulfill(userTokens);
-                            });
+                        try {
+                            if (Date.compare(Date.today().setTimeToNow(), Date.parse(userTokens.expires_at)) == -1) {
+                                setCredentials(userTokens.access_token, userTokens.refresh_token);
+                                setAgenda(oAuthClient);
+                            } else {
+                                setCredentials(userTokens.access_token, userTokens.refresh_token, oAuthClient);
+                                refreshToken(id, userTokens.refresh_token).then(function(tokens) {
+                                    setAgenda(oAuthClient);
+                                    fulfill(oAuthClient);
+
+                                });
+                            }
+                        } catch (err) {
+                            console.log(err);
+                            reject(err);
                         }
 
                     } else {
@@ -30,9 +40,8 @@ module.exports = function authorizationManager() {
                             maxAge: 900000,
                             httpOnly: true
                         });
-                        // res.set('Cookie', 'id='+id);
                         requestToken(res);
-                        fulfill(tokens);
+                        fulfill('');
                     }
 
                 });
@@ -48,10 +57,9 @@ module.exports = function authorizationManager() {
                     console.log(err);
                     reject(err);
                 } else {
-                    // Save that token
                     storeToken(id, tokens).then(function(doc) {
                         setCredentials(tokens.access_token, tokens.refresh_token);
-                        fulfill(doc);
+                        fulfill(oAuthClient);
                     });
                 }
             });
@@ -66,7 +74,6 @@ module.exports = function authorizationManager() {
                     reject(err);
                 }
                 updateToken(id, tokens).then(function() {
-                    setCredentials(tokens.access_token, refresh_token, oAuthClient);
                     fulfill(tokens);
                 });
 
@@ -101,7 +108,6 @@ module.exports = function authorizationManager() {
             settings.expires_at = new Date(token.expiry_date);
             settings.refresh_token = token.refresh_token;
             tokenRepository.add(settings).then(function(doc) {
-                console.log('auth- storeToken');
                 fulfill(doc);
             });
         });

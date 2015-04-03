@@ -1,41 +1,19 @@
-var authorizationManager = require('./authorizationManager');
+var twilio = require('twilio');
 
 function routes(app) {
-    app.get('/', function(req, res) {
+    app.get('/api/calendar/call', function(req, res) {
+        var number = req.query.number;
+        var eventName = req.query.eventName;
+        var resp = new twilio.TwimlResponse();
+        resp.say('Your meeting ' + eventName + ' is starting.', {
+            voice: 'alice',
+            language: 'en-gb'
+        }).dial(number);
 
-        var id = req.query.id;
-        console.log(id);
-        if (id) {
-            authorizationManager.authorization(id).then(function(d) {
-                console.log(d);
-                res.json(d);
-            });
-        } else {
-            res.send('hello');
-        }
-
-    });
-
-    app.get('api/authorization/failure', function(req, res) {
-
-        res.json({
-            'message': 'auth err'
+        res.writeHead(200, {
+            'Content-Type': 'text/xml'
         });
-    })
-
-
-    app.get('/api/authorization/gaauthorize', function(req, res) {
-        var code = req.query.code;
-
-        if (code) {
-            authorizationManager.googleAuthorization(code, function(err, data) {
-                if (err) {
-                    console.log(err);
-                } else {
-                    res.redirect('/');
-                }
-            });
-        }
+        res.end(resp.toString());
 
     });
 }
